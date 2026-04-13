@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: pokedb
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  backend:
+    build: ./FastApi
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      # Docker automatically maps the name 'db' to the MySQL container
+      DATABASE_URL: mysql+pymysql://root:password@db:3306/pokedb
+
+  frontend:
+    build: ./PokeApi/client
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
